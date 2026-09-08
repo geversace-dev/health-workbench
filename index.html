@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f8eee4" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root{--ink:#35413d;--muted:#82938d;--bg:#f8fbf8;--card:#fff;--line:#e0ece7;--peach:#e6ad8b;--rose:#77ab9d;--lilac:#a8b3d6;--sage:#9dbb84;--blue:#90bec2;--cream:#e8f4f1}
+    body{background:#e6efeb}.hero{background:linear-gradient(135deg,#dcefe8,#edf8f4)}.flower{color:#89bdae}.avatar{background:#9fc6bc}.bottom-nav{background:rgba(255,255,255,.94);border-color:#e0ece7}.bottom-nav .active{color:#609485}.text-btn{color:#699b8d}.round-add{background:#e8f4f1;color:#629384}.workout-hero,.photo-card,.plan-card{background:#eef7f4}.recipe-feature{background:#e3f1eb}.nutrition .ring{background:conic-gradient(#7db8a8 0 34%,#a9b9d6 34% 54%,#afc693 54% 71%,#e9f0ed 71%)}.modal-card .save{background:#70a999}
+  </style>
+  <title>澄 · 健康工作台</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div><p class="eyebrow" id="dateLabel">2026年9月8日 · 星期二</p><h1 id="pageTitle">早上好，澄</h1></div>
+      <button class="avatar" aria-label="个人资料">澄</button>
+    </header>
+
+    <main id="app">
+      <section class="view active" data-view="home">
+        <div class="hero card">
+          <div class="hero-copy"><span class="chip sun">☀ 今天状态不错</span><h2>温柔地完成<br>今天的自己</h2><p>已连续记录 <b>12</b> 天</p></div>
+          <div class="flower">✦</div>
+        </div>
+        <section class="section-head"><h3>今日概览</h3><button class="text-btn" data-nav="plan">查看计划</button></section>
+        <div class="metrics-grid">
+          <button class="metric card" data-open="water"><span class="metric-icon blue">💧</span><b id="waterValue">1.2 L</b><small>饮水 · 目标 2.0 L</small><div class="bar"><i id="waterBar" style="width:60%"></i></div></button>
+          <button class="metric card" data-nav="food"><span class="metric-icon peach">🍑</span><b>1,280</b><small>千卡 · 还可摄入 520</small><div class="bar peachbar"><i style="width:71%"></i></div></button>
+          <button class="metric card" data-nav="workout"><span class="metric-icon lilac">◌</span><b>45 分钟</b><small>活动 · 力量训练</small><div class="bar purplebar"><i style="width:70%"></i></div></button>
+          <button class="metric card" data-nav="body"><span class="metric-icon green">⌁</span><b>52.6 kg</b><small>体重 · 较上周 −0.3</small><div class="bar greenbar"><i style="width:63%"></i></div></button>
+        </div>
+        <section class="section-head"><h3>今日安排</h3><button class="round-add" data-open="reminder">＋</button></section>
+        <div class="agenda card"><div class="time">18:30</div><div class="agenda-icon">🏋️</div><div><b>下肢力量训练</b><p>深蹲 · 硬拉 · 臀桥 · 50 分钟</p></div><button class="check" data-complete="训练">✓</button></div>
+        <section class="section-head"><h3>周期关怀</h3><button class="text-btn" data-nav="plan">月历</button></section>
+        <div class="cycle card"><span class="cycle-art">◒</span><div><b>卵泡期 · 第 9 天</b><p>精力充沛，适合力量与冲刺训练。</p></div><span class="chev">›</span></div>
+      </section>
+
+      <section class="view" data-view="workout">
+        <div class="title-row"><div><p class="eyebrow">训练记录</p><h2>运动</h2></div><button class="round-add" data-open="workout">＋</button></div>
+        <div class="workout-hero card"><span>🔥</span><div><p>本周训练</p><b>3 <small>/ 4 次</small></b><div class="bar purplebar"><i style="width:75%"></i></div></div><em>保持节奏</em></div>
+        <section class="section-head"><h3>选择训练类型</h3></section>
+        <div class="type-grid">
+          <button class="type card" data-open="workout"><span>↟</span><b>上肢</b><small>推举 · 划船</small></button><button class="type card" data-open="workout"><span>⌄</span><b>下肢</b><small>深蹲 · 硬拉</small></button><button class="type card" data-open="workout"><span>→</span><b>推</b><small>胸 · 肩 · 三头</small></button><button class="type card" data-open="workout"><span>←</span><b>拉</b><small>背 · 二头</small></button><button class="type card wide" data-open="workout"><span>◎</span><b>全身训练</b><small>均衡激活每个部位</small><i>开始 →</i></button>
+        </div>
+        <section class="section-head"><h3>最近训练</h3><button class="text-btn">全部</button></section>
+        <div class="record card"><div class="record-badge">下</div><div><b>下肢力量</b><p>今天 · 45 分钟 · 1,820 千卡</p></div><span>›</span></div>
+      </section>
+
+      <section class="view" data-view="plan">
+        <div class="title-row"><div><p class="eyebrow">训练与生理周期</p><h2>计划日历</h2></div><button class="round-add" data-open="plan">＋</button></div>
+        <div class="calendar card"><div class="calendar-top"><button id="prevMonth">‹</button><b id="monthLabel">2026 年 9 月</b><button id="nextMonth">›</button></div><div class="weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div><div id="calendarDays" class="days"></div><div class="legend"><span><i class="power"></i>力量</span><span><i class="cardio"></i>有氧</span><span><i class="period"></i>经期</span><span><i class="ovulation"></i>排卵</span></div></div>
+        <div class="plan-card card"><span class="plan-icon">♙</span><div><p>本周目标</p><b>完成 4 次训练</b><small>已完成 3 次 · 75%</small></div><div class="mini-ring"><b>75%</b></div></div>
+        <section class="section-head"><h3>9 月 8 日 · 今日</h3><button class="text-btn" data-open="plan">编辑</button></section>
+        <div class="compare card"><div><small>计划</small><b>下肢力量训练</b><p>深蹲、硬拉、臀桥</p></div><div class="actual"><small>实际</small><b>待完成</b><p>点击记录训练</p></div></div>
+      </section>
+
+      <section class="view" data-view="food">
+        <div class="title-row"><div><p class="eyebrow">记录每一餐</p><h2>饮食营养</h2></div><button class="round-add" data-open="food">＋</button></div>
+        <div class="nutrition card"><div class="ring"><div><b>1,280</b><small>/ 1,800 kcal</small></div></div><div class="macro"><p><i class="protein"></i>蛋白质 <b>72 / 110g</b></p><p><i class="carb"></i>碳水 <b>142 / 210g</b></p><p><i class="fat"></i>脂肪 <b>42 / 60g</b></p></div></div>
+        <div class="photo-card card"><div><span>⌁</span><b>拍照识别食物</b><p>拍下餐食，自动分析营养成分</p></div><button data-open="camera">拍照</button></div>
+        <section class="section-head"><h3>今日餐饮</h3><button class="text-btn" data-open="food">手动添加</button></section>
+        <div class="meal card"><span class="meal-emoji">🥣</span><div><b>早餐</b><p>希腊酸奶 · 蓝莓 · 燕麦</p></div><em>385 kcal</em></div><div class="meal card"><span class="meal-emoji">🍱</span><div><b>午餐</b><p>藜麦鸡胸肉沙拉</p></div><em>540 kcal</em></div><div class="meal card"><span class="meal-emoji">🍌</span><div><b>加餐</b><p>香蕉 · 杏仁</p></div><em>180 kcal</em></div>
+      </section>
+
+      <section class="view" data-view="recipes"><div class="title-row"><div><p class="eyebrow">轻盈又好吃</p><h2>食谱灵感</h2></div><button class="round-add">＋</button></div><div class="recipe-feature card"><div><span class="chip">高蛋白</span><h2>蜜桃酸奶碗</h2><p>5 分钟完成的元气早餐</p><b>356 kcal · 蛋白质 28g</b></div><span>🍑</span></div><section class="section-head"><h3>为你推荐</h3><button class="text-btn">分类</button></section><div class="recipes"><article class="card"><span>🥗</span><b>烤南瓜谷物碗</b><small>晚餐 · 420 kcal</small></article><article class="card"><span>🍝</span><b>番茄虾仁意面</b><small>午餐 · 510 kcal</small></article></div></section>
+
+      <section class="view" data-view="knowledge"><div class="title-row"><div><p class="eyebrow">更了解自己的身体</p><h2>知识库</h2></div><button class="round-add">⌕</button></div><div class="search card">⌕ <span>搜索健康、训练、营养知识</span></div><article class="article card"><span class="article-icon">◒</span><div><small>女性健康 · 6 分钟阅读</small><b>不同周期阶段，如何安排训练？</b><p>顺应身体节律，让训练更有效率。</p></div></article><article class="article card"><span class="article-icon lil">↟</span><div><small>力量训练 · 4 分钟阅读</small><b>渐进超负荷的入门指南</b><p>用简单的方法稳步变强。</p></div></article></section>
+
+      <section class="view" data-view="body"><div class="title-row"><div><p class="eyebrow">见证每一点改变</p><h2>身体数据</h2></div><button class="round-add" data-open="body">＋</button></div><div class="body-metrics"><div class="card"><small>体重</small><b>52.6 <em>kg</em></b><p class="down">↓ 0.3 kg 本周</p></div><div class="card"><small>体脂率</small><b>24.8 <em>%</em></b><p class="down">↓ 0.4% 本周</p></div></div><div class="chart card"><div class="chart-head"><div><b>体重趋势</b><p>近 30 天</p></div><button>30 天⌄</button></div><svg viewBox="0 0 340 135" role="img" aria-label="体重趋势图"><defs><linearGradient id="fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#df957e" stop-opacity=".32"/><stop offset="1" stop-color="#df957e" stop-opacity="0"/></linearGradient></defs><path d="M0 106 C30 92 40 102 65 81 S110 89 135 64 S177 82 204 55 S256 66 280 39 S316 46 340 20 L340 135 L0 135Z" fill="url(#fill)"/><path d="M0 106 C30 92 40 102 65 81 S110 89 135 64 S177 82 204 55 S256 66 280 39 S316 46 340 20" fill="none" stroke="#c96e59" stroke-width="3" stroke-linecap="round"/></svg><div class="chart-labels"><span>8/10</span><span>8/17</span><span>8/24</span><span>9/01</span><span>今天</span></div></div><div class="chart card"><div class="chart-head"><div><b>体脂率趋势</b><p>近 30 天</p></div><button>30 天⌄</button></div><svg viewBox="0 0 340 135" role="img" aria-label="体脂率趋势图"><path d="M0 55 C35 52 43 78 76 66 S120 90 149 78 S185 92 215 70 S260 85 288 58 S315 68 340 41" fill="none" stroke="#8f9f80" stroke-width="3" stroke-linecap="round"/></svg></div></section>
+
+      <section class="view" data-view="settings"><div class="title-row"><div><p class="eyebrow">为你量身设置</p><h2>设置</h2></div></div><div class="profile card"><span>澄</span><div><b>澄</b><p>健康记录第 12 天</p></div><i>›</i></div><section class="setting-group"><p>提醒</p><button class="setting card" data-open="water"><span>💧</span><b>喝水提醒</b><small>每 90 分钟</small><i>›</i></button><button class="setting card" data-open="reminder"><span>◷</span><b>提醒事项</b><small>训练、用药和自定义事项</small><i>›</i></button></section><section class="setting-group"><p>数据与连接</p><button class="setting card" data-open="watch"><span>◌</span><b>Apple 健康数据</b><small>导入 Apple Watch 运动与周期数据</small><i>›</i></button><button class="setting card"><span>⇩</span><b>导出我的数据</b><i>›</i></button></section></section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="主导航"><button class="active" data-nav="home"><span>⌂</span>首页</button><button data-nav="workout"><span>◒</span>运动</button><button data-nav="plan"><span>▦</span>计划</button><button data-nav="food"><span>◌</span>饮食</button><button data-nav="recipes"><span>♨</span>食谱</button><button data-nav="knowledge"><span>✧</span>知识</button><button data-nav="body"><span>⌁</span>身体</button><button data-nav="settings"><span>⚙</span>设置</button></nav>
+  </div>
+  <dialog id="modal"><form method="dialog" class="modal-card"><button class="close" value="cancel">×</button><div id="modalContent"></div></form></dialog>
+  <div id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
