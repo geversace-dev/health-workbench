@@ -9,6 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icon.svg" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="calendar-plus.css" />
   <style>
     :root{--ink:#35413d;--muted:#82938d;--bg:#f8fbf8;--card:#fff;--line:#e0ece7;--peach:#e6ad8b;--rose:#77ab9d;--lilac:#a8b3d6;--sage:#9dbb84;--blue:#90bec2;--cream:#e8f4f1}
     body{background:#e6efeb}.hero{background:linear-gradient(135deg,#dcefe8,#edf8f4)}.flower{color:#89bdae}.avatar{background:#9fc6bc}.bottom-nav{background:rgba(255,255,255,.94);border-color:#e0ece7}.bottom-nav .active{color:#609485}.text-btn{color:#699b8d}.round-add{background:#e8f4f1;color:#629384}.workout-hero,.photo-card,.plan-card{background:#eef7f4}.recipe-feature{background:#e3f1eb}.nutrition .ring{background:conic-gradient(#7db8a8 0 34%,#a9b9d6 34% 54%,#afc693 54% 71%,#e9f0ed 71%)}.modal-card .save{background:#70a999}
@@ -54,7 +55,8 @@
 
       <section class="view" data-view="plan">
         <div class="title-row"><div><p class="eyebrow">训练与生理周期</p><h2>计划日历</h2></div><button class="round-add" data-open="plan">＋</button></div>
-        <div class="calendar card"><div class="calendar-top"><button id="prevMonth">‹</button><b id="monthLabel">2026 年 9 月</b><button id="nextMonth">›</button></div><div class="weekdays"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div><div id="calendarDays" class="days"></div><div class="legend"><span><i class="power"></i>力量</span><span><i class="cardio"></i>有氧</span><span><i class="period"></i>经期</span><span><i class="ovulation"></i>排卵</span></div></div>
+        <div class="plan-banner"><span>✦</span><div><h3>日历与计划</h3><p>设定训练计划，对比实际完成情况</p></div></div>
+        <div class="calendar card"><div class="calendar-top"><button id="prevMonth">‹ 上月</button><b id="monthLabel">2026 年 9 月</b><button id="nextMonth">下月 ›</button></div><div class="legend"><span>🏋️ 力量</span><span>🏃 有氧</span><span>🧘 恢复</span><span>🩸 经期</span><span>🌸 排卵期</span></div><div class="weekdays"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div id="calendarDays" class="days detail-days"></div></div>
         <div class="plan-card card"><span class="plan-icon">♙</span><div><p>本周目标</p><b>完成 4 次训练</b><small>已完成 3 次 · 75%</small></div><div class="mini-ring"><b>75%</b></div></div>
         <section class="section-head"><h3>9 月 8 日 · 今日</h3><button class="text-btn" data-open="plan">编辑</button></section>
         <div class="compare card"><div><small>计划</small><b>下肢力量训练</b><p>深蹲、硬拉、臀桥</p></div><div class="actual"><small>实际</small><b>待完成</b><p>点击记录训练</p></div></div>
@@ -82,5 +84,6 @@
   <dialog id="modal"><form method="dialog" class="modal-card"><button class="close" value="cancel">×</button><div id="modalContent"></div></form></dialog>
   <div id="toast" role="status"></div>
   <script src="app.js"></script>
+  <script src="calendar-plus.js"></script>
 </body>
 </html>
