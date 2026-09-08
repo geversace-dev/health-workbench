@@ -1,120 +1,98 @@
-/* 支持 Apple 健康 export.zip / export.xml，以及常见运动 CSV 文件。 */
+/* Apple 健康 / CSV 导入：把明细实际保存并显示在运动、计划与日历中。 */
 (() => {
   const watch = document.querySelector('[data-open="watch"]');
   if (!watch) return;
   const dialog = document.querySelector('#modal');
   const content = document.querySelector('#modalContent');
 
-  function summarizeCsv(csv) {
-    const rows = csv.trim().split(/\r?\n/).filter(Boolean);
-    const body = rows.length > 1 ? rows.slice(1) : [];
-    const normalized = csv.toLowerCase();
-    return {
-      workouts: body.length,
-      swimming: (normalized.match(/游泳|swimming|swim/g) || []).length,
-      menstrual: (normalized.match(/经期|月经|menstrual|period/g) || []).length
-    };
+  const dateOnly = value => (value || '').slice(0, 10);
+  const escape = value => String(value || '').replace(/[&<>"']/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[char]);
+
+  function parseCsv(text) {
+    const lines = text.replace(/^\uFEFF/, '').trim().split(/\r?\n/).filter(Boolean);
+    const columns = (lines.shift() || '').split(',').map(item => item.trim());
+    const at = name => columns.indexOf(name);
+    const value = (items, name) => at(name) < 0 ? '' : (items[at(name)] || '').trim();
+    const data = { workouts: [], cycles: [] };
+    lines.forEach(line => {
+      const items = line.split(',');
+      const type = value(items, 'record_type');
+      if (type === 'workout') data.workouts.push({
+        date: dateOnly(value(items, 'start_date')),
+        activity: value(items, 'activity').replace('HKWorkoutActivityType', '') || '运动',
+        duration: value(items, 'duration_minutes'),
+        energy: value(items, 'energy_kcal'),
+        distance: value(items, 'distance_km')
+      });
+      if (type === 'menstrual_flow') data.cycles.push({
+        date: dateOnly(value(items, 'start_date')),
+        value: value(items, 'cycle_value') || '经期'
+      });
+    });
+    return data;
   }
 
-  function summarizeXml(xml) {
-    return {
-      workouts: (xml.match(/<Workout\b/g) || []).length,
-      swimming: (xml.match(/HKWorkoutActivityTypeSwimming/g) || []).length,
-      menstrual: (xml.match(/HKCategoryTypeIdentifierMenstrualFlow/g) || []).length
-    };
+  function readHealth() {
+    try { return JSON.parse(localStorage.getItem('calmImportedHealth') || '{"workouts":[],"cycles":[]}'); }
+    catch { return { workouts: [], cycles: [] }; }
   }
 
-  // 健康导出可能超过 1GB。分段读取，避免手机浏览器一次装入全部内容而崩溃。
-  async function summarizeLargeXml(file, onProgress) {
-    const reader = file.stream().getReader();
-    const decoder = new TextDecoder();
-    const records = { workouts: 0, swimming: 0, menstrual: 0 };
-    let carry = '';
-    let read = 0;
-    const count = text => {
-      records.workouts += (text.match(/<Workout\b/g) || []).length;
-      records.swimming += (text.match(/HKWorkoutActivityTypeSwimming/g) || []).length;
-      records.menstrual += (text.match(/HKCategoryTypeIdentifierMenstrualFlow/g) || []).length;
-    };
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      read += value.byteLength;
-      const text = carry + decoder.decode(value, { stream: true });
-      const safeEnd = Math.max(0, text.length - 160);
-      count(text.slice(0, safeEnd));
-      carry = text.slice(safeEnd);
-      onProgress(Math.min(99, Math.round(read / file.size * 100)));
+  function renderImportedRecords() {
+    const data = readHealth();
+    const newest = [...data.workouts].sort((a,b) => b.date.localeCompare(a.date));
+    document.querySelectorAll('.health-imported-block').forEach(node => node.remove());
+    if (!newest.length && !data.cycles.length) return;
+
+    const workoutView = document.querySelector('[data-view="workout"]');
+    const workoutAnchor = workoutView?.querySelector('.record');
+    if (workoutAnchor) {
+      const rows = newest.slice(0, 5).map(item => `<div class="record card"><div class="record-badge">${item.activity.includes('Swimming') || item.activity.includes('游泳') ? '泳' : '动'}</div><div><b>${escape(item.activity)}</b><p>${escape(item.date)} · ${escape(item.duration || '—')} 分钟${item.energy ? ' · '+escape(item.energy)+' kcal' : ''}</p></div><span>✓</span></div>`).join('');
+      workoutAnchor.insertAdjacentHTML('beforebegin', `<section class="health-imported-block"><div class="section-head"><h3>已导入训练</h3><small>${newest.length} 条</small></div>${rows}</section>`);
     }
-    count(carry + decoder.decode());
-    onProgress(100);
-    return records;
+
+    const planView = document.querySelector('[data-view="plan"]');
+    const calendar = planView?.querySelector('.calendar');
+    if (calendar) {
+      const latestCycle = [...data.cycles].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 4);
+      const latestWorkouts = newest.slice(0, 4);
+      const rows = [
+        ...latestCycle.map(item => `<p>🩸 <b>${escape(item.date)}</b> · 经期记录</p>`),
+        ...latestWorkouts.map(item => `<p>${item.activity.includes('Swimming') ? '🏊' : '🏋️'} <b>${escape(item.date)}</b> · ${escape(item.activity)}${item.duration ? ' · '+escape(item.duration)+' 分钟' : ''}</p>`)
+      ].join('');
+      calendar.insertAdjacentHTML('afterend', `<div class="card health-imported-block imported-history"><div class="section-head"><h3>已导入健康记录</h3><small>运动 ${data.workouts.length} · 经期 ${data.cycles.length}</small></div>${rows}</div>`);
+    }
+    window.dispatchEvent(new Event('health-imported'));
   }
+
+  window.renderImportedHealth = renderImportedRecords;
+  renderImportedRecords();
 
   const open = () => {
-    content.innerHTML = `<h3>导入健康与运动数据</h3>
-      <p class="health-help">可选择 Apple 健康导出的 <b>export.zip / export.xml</b>，也可直接选择你已有的 <b>CSV 表格</b>（运动或身体数据）。</p>
-      <label class="health-picker">选择健康数据文件<input id="healthImportFile" type="file" accept=".zip,.xml,.csv,application/zip,text/xml,application/xml,text/csv"></label>
-      <p id="healthFileName" class="health-name">尚未选择文件</p>
-      <button id="healthImportBtn" class="save" type="button" disabled>导入到健康工作台</button>`;
+    content.innerHTML = `<h3>导入健康与运动数据</h3><p class="health-help">选择已生成的 <b>健康工作台_运动周期精简版.csv</b>。导入后会显示在「运动」和「计划日历」。</p><label class="health-picker">选择健康数据文件<input id="healthImportFile" type="file" accept="*/*"></label><p id="healthFileName" class="health-name">尚未选择文件</p><button id="healthImportBtn" class="save" type="button" disabled>导入并显示记录</button>`;
     if (!dialog.open) dialog.showModal();
-
     const fileInput = document.querySelector('#healthImportFile');
     const name = document.querySelector('#healthFileName');
     const button = document.querySelector('#healthImportBtn');
     fileInput.addEventListener('change', () => {
-      const file = fileInput.files[0];
-      name.textContent = file ? `已选择：${file.name}` : '尚未选择文件';
-      button.disabled = !file;
+      const file = fileInput.files[0]; name.textContent = file ? `已选择：${file.name}` : '尚未选择文件'; button.disabled = !file;
     });
-
     button.addEventListener('click', async () => {
-      const file = fileInput.files[0];
-      if (!file) return;
-      button.disabled = true;
-      button.textContent = '正在读取数据…';
+      const file = fileInput.files[0]; if (!file) return;
+      button.disabled = true; button.textContent = '正在导入记录…';
       try {
-        const lowerName = file.name.toLowerCase();
-        let records;
-        if (lowerName.endsWith('.csv')) {
-          records = summarizeCsv(await file.text());
-        } else {
-          let xml = '';
-          if (lowerName.endsWith('.zip')) {
-            if (!window.JSZip) throw new Error('zip-reader-unavailable');
-            const zip = await window.JSZip.loadAsync(file);
-            const entry = Object.values(zip.files).find(item => /export\.xml$/i.test(item.name));
-            if (!entry) throw new Error('xml-not-found');
-            xml = await entry.async('text');
-          } else if (lowerName.endsWith('.xml')) {
-            records = await summarizeLargeXml(file, progress => {
-              button.textContent = `正在读取大文件…${progress}%`;
-            });
-          } else {
-            throw new Error('unsupported-file');
-          }
-          if (!records) records = summarizeXml(xml);
-        }
-        localStorage.setItem('appleHealthImport', JSON.stringify({
-          importedAt: new Date().toISOString(), fileName: file.name, ...records
-        }));
-        dialog.close();
-        const toast = document.querySelector('#toast');
-        toast.textContent = `读取完成：${records.workouts} 条记录（游泳 ${records.swimming} 条、周期 ${records.menstrual} 条）`;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3600);
+        if (!file.name.toLowerCase().endsWith('.csv')) throw new Error('csv-only');
+        const data = parseCsv(await file.text());
+        if (!data.workouts.length && !data.cycles.length) throw new Error('empty');
+        localStorage.setItem('calmImportedHealth', JSON.stringify(data));
+        localStorage.setItem('appleHealthImport', JSON.stringify({ importedAt:new Date().toISOString(), fileName:file.name, workouts:data.workouts.length, menstrual:data.cycles.length }));
+        renderImportedRecords(); dialog.close();
+        const toast = document.querySelector('#toast'); toast.textContent = `已导入并显示：${data.workouts.length} 条运动、${data.cycles.length} 条经期记录`;
+        toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 4000);
       } catch (error) {
-        button.disabled = false;
-        button.textContent = '重新尝试导入';
-        name.textContent = error.message === 'xml-not-found'
-          ? '文件中未找到 export.xml，请确认选择的是健康 App 导出包。'
-          : '无法读取该文件，请选择 CSV、export.zip 或 export.xml。';
+        button.disabled = false; button.textContent = '重新尝试导入';
+        name.textContent = error.message === 'empty' ? '没有读到有效记录，请选择“健康工作台_运动周期精简版.csv”。' : '请选用已生成的 CSV 精简版文件。';
       }
     });
   };
-
-  watch.addEventListener('click', event => {
-    event.stopImmediatePropagation();
-    open();
-  }, true);
+  watch.addEventListener('click', event => { event.stopImmediatePropagation(); open(); }, true);
 })();
