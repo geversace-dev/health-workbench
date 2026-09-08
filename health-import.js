@@ -16,6 +16,41 @@
     };
   }
 
+  function summarizeXml(xml) {
+    return {
+      workouts: (xml.match(/<Workout\b/g) || []).length,
+      swimming: (xml.match(/HKWorkoutActivityTypeSwimming/g) || []).length,
+      menstrual: (xml.match(/HKCategoryTypeIdentifierMenstrualFlow/g) || []).length
+    };
+  }
+
+  // 健康导出可能超过 1GB。分段读取，避免手机浏览器一次装入全部内容而崩溃。
+  async function summarizeLargeXml(file, onProgress) {
+    const reader = file.stream().getReader();
+    const decoder = new TextDecoder();
+    const records = { workouts: 0, swimming: 0, menstrual: 0 };
+    let carry = '';
+    let read = 0;
+    const count = text => {
+      records.workouts += (text.match(/<Workout\b/g) || []).length;
+      records.swimming += (text.match(/HKWorkoutActivityTypeSwimming/g) || []).length;
+      records.menstrual += (text.match(/HKCategoryTypeIdentifierMenstrualFlow/g) || []).length;
+    };
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      read += value.byteLength;
+      const text = carry + decoder.decode(value, { stream: true });
+      const safeEnd = Math.max(0, text.length - 160);
+      count(text.slice(0, safeEnd));
+      carry = text.slice(safeEnd);
+      onProgress(Math.min(99, Math.round(read / file.size * 100)));
+    }
+    count(carry + decoder.decode());
+    onProgress(100);
+    return records;
+  }
+
   const open = () => {
     content.innerHTML = `<h3>导入健康与运动数据</h3>
       <p class="health-help">可选择 Apple 健康导出的 <b>export.zip / export.xml</b>，也可直接选择你已有的 <b>CSV 表格</b>（运动或身体数据）。</p>
@@ -52,15 +87,13 @@
             if (!entry) throw new Error('xml-not-found');
             xml = await entry.async('text');
           } else if (lowerName.endsWith('.xml')) {
-            xml = await file.text();
+            records = await summarizeLargeXml(file, progress => {
+              button.textContent = `正在读取大文件…${progress}%`;
+            });
           } else {
             throw new Error('unsupported-file');
           }
-          records = {
-            workouts: (xml.match(/<Workout\b/g) || []).length,
-            swimming: (xml.match(/HKWorkoutActivityTypeSwimming/g) || []).length,
-            menstrual: (xml.match(/HKCategoryTypeIdentifierMenstrualFlow/g) || []).length
-          };
+          if (!records) records = summarizeXml(xml);
         }
         localStorage.setItem('appleHealthImport', JSON.stringify({
           importedAt: new Date().toISOString(), fileName: file.name, ...records
